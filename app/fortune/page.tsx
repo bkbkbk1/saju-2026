@@ -2,9 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAccount, useConnect, useSendTransaction } from 'wagmi';
+import { parseEther } from 'viem';
 
 export default function FortunePage() {
   const router = useRouter();
+  const { isConnected, address } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { sendTransaction } = useSendTransaction();
+
   const [step, setStep] = useState(1);
   const [birthDate, setBirthDate] = useState('');
   const [birthHour, setBirthHour] = useState('12');
@@ -238,23 +244,47 @@ export default function FortunePage() {
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                // 실제 NFT 민팅 트랜잭션 시뮬레이션
-                setLoading(true);
-                setTimeout(() => {
-                  setPaid(true);
-                  setResult(tempResult);
-                  setStep(4);
-                  setLoading(false);
-                  alert('NFT 발급 완료! 운세 결과를 확인하세요.');
-                }, 2000);
-              }}
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all disabled:opacity-50"
-            >
-              {loading ? '민팅 중...' : 'NFT 발급하고 운세 보기 →'}
-            </button>
+            {!isConnected ? (
+              <button
+                onClick={() => connect({ connector: connectors[0] })}
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all"
+              >
+                지갑 연결하기
+              </button>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-sm text-gray-600 text-center">
+                  연결된 지갑: {address?.slice(0, 6)}...{address?.slice(-4)}
+                </div>
+                <button
+                  onClick={async () => {
+                    setLoading(true);
+                    try {
+                      // 0.001 ETH를 개발자 주소로 전송
+                      await sendTransaction({
+                        to: '0x777BEF71B74F71a97925e6D2AF3786EC08A23923', // 개발자 주소
+                        value: parseEther('0.001'),
+                      });
+
+                      // 트랜잭션 완료 후 결과 표시
+                      setPaid(true);
+                      setResult(tempResult);
+                      setStep(4);
+                      alert('NFT 발급 완료! 운세 결과를 확인하세요.');
+                    } catch (error) {
+                      console.error('Transaction error:', error);
+                      alert('트랜잭션이 취소되었거나 실패했습니다.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all disabled:opacity-50"
+                >
+                  {loading ? '트랜잭션 진행 중...' : 'NFT 발급하고 운세 보기 →'}
+                </button>
+              </div>
+            )}
 
             <button
               onClick={() => setStep(3)}
