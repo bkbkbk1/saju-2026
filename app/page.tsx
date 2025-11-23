@@ -43,10 +43,10 @@ export default function Home() {
 
           <div className="mt-10 p-6 bg-gray-50 rounded-xl">
             <p className="text-sm text-gray-500 mb-3">
-              파캐스터 미니앱으로 이용하세요
+              지금 바로 운세를 확인하세요
             </p>
             <a
-              href="/api/frame"
+              href="/fortune"
               className="inline-block bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold px-8 py-3 rounded-full hover:shadow-lg transition-all"
             >
               운세 보러 가기 →
