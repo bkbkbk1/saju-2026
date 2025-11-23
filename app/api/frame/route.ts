@@ -24,11 +24,21 @@ function getFrameHtml(imageUrl: string, buttons: any[], postUrl?: string, inputT
 // GET: 초기 Frame 메타데이터
 export async function GET() {
   const imageUrl = `${process.env.NEXT_PUBLIC_URL}/api/welcome-image`;
+  const initialState = JSON.stringify({ step: 1 });
 
-  return new NextResponse(
-    getFrameHtml(imageUrl, [{ label: '운세 보기 시작' }]),
-    { headers: { 'Content-Type': 'text/html' } }
-  );
+  const html = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta property="fc:frame" content="vNext" />
+    <meta property="fc:frame:image" content="${imageUrl}" />
+    <meta property="fc:frame:button:1" content="운세 보기 시작" />
+    <meta property="fc:frame:post_url" content="${process.env.NEXT_PUBLIC_URL}/api/frame" />
+    <meta property="fc:frame:state" content="${initialState}" />
+  </head>
+  <body>2026년 운세 보기</body>
+</html>`;
+
+  return new NextResponse(html, { headers: { 'Content-Type': 'text/html' } });
 }
 
 // POST: Frame 인터랙션 처리
@@ -44,12 +54,20 @@ export async function POST(req: NextRequest) {
     // Step 1: 생년월일 입력
     if (step === 1) {
       const imageUrl = `${process.env.NEXT_PUBLIC_URL}/api/step-image?step=1`;
-      const html = getFrameHtml(
-        imageUrl,
-        [{ label: '다음' }],
-        `${process.env.NEXT_PUBLIC_URL}/api/frame`,
-        '생년월일 8자리 (예: 19901225)'
-      );
+      const newState = JSON.stringify({ step: 2 });
+
+      const html = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta property="fc:frame" content="vNext" />
+    <meta property="fc:frame:image" content="${imageUrl}" />
+    <meta property="fc:frame:input:text" content="생년월일 8자리 (예: 19901225)" />
+    <meta property="fc:frame:button:1" content="다음" />
+    <meta property="fc:frame:post_url" content="${process.env.NEXT_PUBLIC_URL}/api/frame" />
+    <meta property="fc:frame:state" content="${newState}" />
+  </head>
+  <body>생년월일 입력</body>
+</html>`;
 
       return new NextResponse(html, {
         headers: { 'Content-Type': 'text/html' },
