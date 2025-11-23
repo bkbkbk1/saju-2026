@@ -9,7 +9,7 @@ export default function FortunePage() {
   const router = useRouter();
   const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
-  const { sendTransaction } = useSendTransaction();
+  const { sendTransactionAsync } = useSendTransaction();
 
   const [step, setStep] = useState<number | 'payment'>(1);
   const [birthDate, setBirthDate] = useState('');
@@ -263,10 +263,12 @@ export default function FortunePage() {
                     setLoading(true);
                     try {
                       // 0.001 ETH를 개발자 주소로 전송
-                      await sendTransaction({
+                      const hash = await sendTransactionAsync({
                         to: '0x777BEF71B74F71a97925e6D2AF3786EC08A23923', // 개발자 주소
                         value: parseEther('0.001'),
                       });
+
+                      console.log('Transaction hash:', hash);
 
                       // 트랜잭션 완료 후 결과 표시
                       setPaid(true);
