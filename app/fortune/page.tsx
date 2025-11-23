@@ -11,8 +11,10 @@ export default function FortunePage() {
   const [gender, setGender] = useState<'남성' | '여성'>('남성');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [paid, setPaid] = useState(false);
+  const [tempResult, setTempResult] = useState<any>(null);
 
-  const handleSubmit = async () => {
+  const handleCalculate = async () => {
     if (!birthDate || birthDate.length !== 8) {
       alert('생년월일을 8자리로 입력해주세요 (예: 19901225)');
       return;
@@ -32,8 +34,8 @@ export default function FortunePage() {
       });
 
       const data = await response.json();
-      setResult(data);
-      setStep(4);
+      setTempResult(data);
+      setStep(3.5); // 결제 단계
     } catch (error) {
       console.error('Error:', error);
       alert('운세 계산 중 오류가 발생했습니다.');
@@ -185,18 +187,86 @@ export default function FortunePage() {
                 이전
               </button>
               <button
-                onClick={handleSubmit}
+                onClick={handleCalculate}
                 disabled={loading}
                 className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold px-12 py-3 rounded-full hover:shadow-lg transition-all disabled:opacity-50"
               >
-                {loading ? '계산 중...' : '운세 보기'}
+                {loading ? '계산 중...' : '다음'}
               </button>
             </div>
           </div>
         )}
 
+        {/* Step 3.5: NFT 민팅/결제 */}
+        {step === 3.5 && tempResult && (
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">🎁 운세 NFT 발급</h2>
+            <p className="text-gray-600 mb-8">
+              당신의 2026년 운세를 NFT로 소장하세요
+            </p>
+
+            <div className="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-2xl p-8 mb-8">
+              <div className="text-6xl mb-4">🔮</div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                2026년 병오년 운세 NFT
+              </h3>
+              <p className="text-gray-600 mb-6">
+                사주팔자와 ChatGPT 상세 해석 포함
+              </p>
+              <div className="text-4xl font-bold text-purple-700">
+                0.001 ETH
+              </div>
+              <p className="text-sm text-gray-500 mt-2">약 $3 USD</p>
+            </div>
+
+            <div className="space-y-3 text-left bg-white border-2 border-purple-200 rounded-xl p-6 mb-8">
+              <div className="flex items-center gap-3">
+                <span className="text-green-500">✓</span>
+                <span className="text-gray-700">사주팔자 (년/월/일/시)</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-green-500">✓</span>
+                <span className="text-gray-700">2026년 상세 운세 해석</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-green-500">✓</span>
+                <span className="text-gray-700">재물/직업/건강운 분석</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-green-500">✓</span>
+                <span className="text-gray-700">NFT 영구 소장 가능</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                // 실제 NFT 민팅 트랜잭션 시뮬레이션
+                setLoading(true);
+                setTimeout(() => {
+                  setPaid(true);
+                  setResult(tempResult);
+                  setStep(4);
+                  setLoading(false);
+                  alert('NFT 발급 완료! 운세 결과를 확인하세요.');
+                }, 2000);
+              }}
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all disabled:opacity-50"
+            >
+              {loading ? '민팅 중...' : 'NFT 발급하고 운세 보기 →'}
+            </button>
+
+            <button
+              onClick={() => setStep(3)}
+              className="mt-4 text-gray-500 hover:text-gray-700 transition-all"
+            >
+              ← 이전으로
+            </button>
+          </div>
+        )}
+
         {/* Step 4: 결과 */}
-        {step === 4 && result && (
+        {step === 4 && result && paid && (
           <div>
             <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">🔮 2026년 병오년 운세</h2>
 
