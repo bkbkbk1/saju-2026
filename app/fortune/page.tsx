@@ -11,7 +11,7 @@ export default function FortunePage() {
   const { connect, connectors } = useConnect();
   const { sendTransaction } = useSendTransaction();
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<number | 'payment'>(1);
   const [birthDate, setBirthDate] = useState('');
   const [birthHour, setBirthHour] = useState('12');
   const [gender, setGender] = useState<'남성' | '여성'>('남성');
@@ -41,7 +41,7 @@ export default function FortunePage() {
 
       const data = await response.json();
       setTempResult(data);
-      setStep(3.5); // 결제 단계
+      setStep('payment'); // 결제 단계
     } catch (error) {
       console.error('Error:', error);
       alert('운세 계산 중 오류가 발생했습니다.');
@@ -204,7 +204,7 @@ export default function FortunePage() {
         )}
 
         {/* Step 3.5: NFT 민팅/결제 */}
-        {step === 3.5 && tempResult && (
+        {step === 'payment' && tempResult && (
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">🎁 운세 NFT 발급</h2>
             <p className="text-gray-600 mb-8">
