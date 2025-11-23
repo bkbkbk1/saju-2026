@@ -248,7 +248,15 @@ export default function FortunePage() {
 
             {!isConnected ? (
               <button
-                onClick={() => connect({ connector: connectors[0] })}
+                onClick={() => {
+                  console.log('Connectors:', connectors);
+                  console.log('First connector:', connectors[0]);
+                  if (connectors[0]) {
+                    connect({ connector: connectors[0] });
+                  } else {
+                    alert('Farcaster 앱에서만 지갑 연결이 가능합니다. Warpcast에서 이 링크를 캐스트하고 열어주세요.');
+                  }
+                }}
                 className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all"
               >
                 지갑 연결하기
