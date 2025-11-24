@@ -50,12 +50,20 @@ export default function FortunePage() {
     }
   };
 
+  // 미니앱 환경 감지
+  const isMiniApp = typeof window !== 'undefined' && (
+    window.location !== window.parent.location || // iframe 안에서 실행
+    /warpcast|farcaster/i.test(navigator.userAgent) // Warpcast User Agent
+  );
+
   console.log('=== RENDER STATE ===');
   console.log('step:', step, 'typeof:', typeof step);
   console.log('result:', result ? 'exists' : 'null');
   console.log('paid:', paid);
   console.log('tempResult:', tempResult ? 'exists' : 'null');
   console.log('isConnected:', isConnected);
+  console.log('isMiniApp:', isMiniApp);
+  console.log('connectors.length:', connectors.length);
   console.log('==================');
 
   return (
@@ -253,19 +261,32 @@ export default function FortunePage() {
             </div>
 
             {!isConnected ? (
-              <button
-                onClick={() => {
-                  console.log('Connecting... connectors:', connectors);
-                  if (connectors[0]) {
-                    connect({ connector: connectors[0] });
-                  } else {
-                    alert('Warpcast 앱에서 열어주세요.');
-                  }
-                }}
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all"
-              >
-                지갑 연결하기
-              </button>
+              <div className="space-y-4">
+                <div className="text-xs bg-yellow-100 p-3 rounded mb-4">
+                  <div>환경: {isMiniApp ? '✅ 미니앱' : '❌ 브라우저'}</div>
+                  <div>Connectors: {connectors.length}개</div>
+                  <div>연결 상태: {isConnected ? '연결됨' : '미연결'}</div>
+                </div>
+                <button
+                  onClick={() => {
+                    console.log('Connecting... connectors:', connectors);
+                    if (connectors[0]) {
+                      connect({ connector: connectors[0] });
+                    } else {
+                      alert('Warpcast 앱에서 열어주세요.');
+                    }
+                  }}
+                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all"
+                >
+                  지갑 연결하기
+                </button>
+                {!isMiniApp && (
+                  <div className="text-sm text-red-600 text-center">
+                    ⚠️ 브라우저에서는 지갑 연결이 작동하지 않습니다.<br/>
+                    Warpcast 앱에서 캐스트로 열어주세요.
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="space-y-4">
                 <div className="text-sm text-gray-600 text-center">
