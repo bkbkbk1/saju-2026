@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount, useConnect, useSendTransaction } from 'wagmi';
 import { parseEther } from 'viem';
@@ -10,6 +10,14 @@ export default function FortunePage() {
   const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
   const { sendTransactionAsync } = useSendTransaction();
+
+  // 자동 연결 시도 (미니앱 환경에서)
+  useEffect(() => {
+    if (!isConnected && connectors.length > 0) {
+      console.log('Auto-connecting to Farcaster wallet...');
+      connect({ connector: connectors[0] });
+    }
+  }, [isConnected, connectors, connect]);
 
   const [step, setStep] = useState<number | 'payment'>(1);
   const [birthDate, setBirthDate] = useState('');
@@ -247,20 +255,13 @@ export default function FortunePage() {
             </div>
 
             {!isConnected ? (
-              <button
-                onClick={() => {
-                  console.log('Connectors:', connectors);
-                  console.log('First connector:', connectors[0]);
-                  if (connectors[0]) {
-                    connect({ connector: connectors[0] });
-                  } else {
-                    alert('Farcaster 앱에서만 지갑 연결이 가능합니다. Warpcast에서 이 링크를 캐스트하고 열어주세요.');
-                  }
-                }}
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all"
-              >
-                지갑 연결하기
-              </button>
+              <div className="text-center py-8">
+                <div className="animate-pulse text-purple-600 mb-4">🔄</div>
+                <p className="text-gray-600">지갑 연결 중...</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Warpcast 앱에서 열어주세요
+                </p>
+              </div>
             ) : (
               <div className="space-y-4">
                 <div className="text-sm text-gray-600 text-center">
