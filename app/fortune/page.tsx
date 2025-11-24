@@ -11,14 +11,6 @@ export default function FortunePage() {
   const { connect, connectors } = useConnect();
   const { sendTransactionAsync } = useSendTransaction();
 
-  // 자동 연결 시도 (미니앱 환경에서)
-  useEffect(() => {
-    if (!isConnected && connectors.length > 0) {
-      console.log('Auto-connecting to Farcaster wallet...');
-      connect({ connector: connectors[0] });
-    }
-  }, [isConnected, connectors, connect]);
-
   const [step, setStep] = useState<number | 'payment'>(1);
   const [birthDate, setBirthDate] = useState('');
   const [birthHour, setBirthHour] = useState('12');
@@ -58,11 +50,22 @@ export default function FortunePage() {
     }
   };
 
-  console.log('Current step:', step, 'Type:', typeof step);
+  console.log('=== RENDER STATE ===');
+  console.log('step:', step, 'typeof:', typeof step);
+  console.log('result:', result ? 'exists' : 'null');
+  console.log('paid:', paid);
+  console.log('tempResult:', tempResult ? 'exists' : 'null');
+  console.log('isConnected:', isConnected);
+  console.log('==================');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+        {/* DEBUG INFO */}
+        <div className="mb-4 p-2 bg-yellow-100 text-xs">
+          Step: {JSON.stringify(step)} | Paid: {String(paid)} | Result: {result ? 'Y' : 'N'}
+        </div>
+
         {/* Step 1: 생년월일 입력 */}
         {step === 1 && (
           <div className="text-center">
@@ -255,13 +258,19 @@ export default function FortunePage() {
             </div>
 
             {!isConnected ? (
-              <div className="text-center py-8">
-                <div className="animate-pulse text-purple-600 mb-4">🔄</div>
-                <p className="text-gray-600">지갑 연결 중...</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Warpcast 앱에서 열어주세요
-                </p>
-              </div>
+              <button
+                onClick={() => {
+                  console.log('Connecting... connectors:', connectors);
+                  if (connectors[0]) {
+                    connect({ connector: connectors[0] });
+                  } else {
+                    alert('Warpcast 앱에서 열어주세요.');
+                  }
+                }}
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all"
+              >
+                지갑 연결하기
+              </button>
             ) : (
               <div className="space-y-4">
                 <div className="text-sm text-gray-600 text-center">
