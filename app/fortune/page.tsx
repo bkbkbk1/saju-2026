@@ -252,9 +252,9 @@ export default function FortunePage() {
                 사주팔자와 ChatGPT 상세 해석 포함
               </p>
               <div className="text-4xl font-bold text-purple-700">
-                0.001 ETH
+                0.0001 ETH
               </div>
-              <p className="text-sm text-gray-500 mt-2">약 $3 USD</p>
+              <p className="text-sm text-gray-500 mt-2">약 $0.30 USD</p>
             </div>
 
             <div className="space-y-3 text-left bg-white border-2 border-purple-200 rounded-xl p-6 mb-8">
@@ -314,7 +314,7 @@ export default function FortunePage() {
                     sendTransaction(
                       {
                         to: '0x777BEF71B74F71a97925e6D2AF3786EC08A23923',
-                        value: parseEther('0.001'),
+                        value: parseEther('0.0001'),
                       },
                       {
                         onSuccess: (hash) => {
