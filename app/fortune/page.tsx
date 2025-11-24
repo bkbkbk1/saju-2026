@@ -24,6 +24,8 @@ export default function FortunePage() {
 
   useEffect(() => {
     const initSDK = async () => {
+      if (typeof window === 'undefined') return;
+
       try {
         await sdk.actions.ready();
         setIsSDKLoaded(true);
