@@ -9,7 +9,7 @@ export default function FortunePage() {
   const router = useRouter();
   const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
-  const { sendTransactionAsync } = useSendTransaction();
+  const { sendTransaction } = useSendTransaction();
 
   const [step, setStep] = useState<number | 'payment'>(1);
   const [birthDate, setBirthDate] = useState('');
@@ -61,11 +61,6 @@ export default function FortunePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-        {/* DEBUG INFO */}
-        <div className="mb-4 p-2 bg-yellow-100 text-xs">
-          Step: {JSON.stringify(step)} | Paid: {String(paid)} | Result: {result ? 'Y' : 'N'}
-        </div>
-
         {/* Step 1: 생년월일 입력 */}
         {step === 1 && (
           <div className="text-center">
@@ -277,28 +272,29 @@ export default function FortunePage() {
                   연결된 지갑: {address?.slice(0, 6)}...{address?.slice(-4)}
                 </div>
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     setLoading(true);
-                    try {
-                      // 0.001 ETH를 개발자 주소로 전송
-                      const hash = await sendTransactionAsync({
-                        to: '0x777BEF71B74F71a97925e6D2AF3786EC08A23923', // 개발자 주소
+                    sendTransaction(
+                      {
+                        to: '0x777BEF71B74F71a97925e6D2AF3786EC08A23923',
                         value: parseEther('0.001'),
-                      });
-
-                      console.log('Transaction hash:', hash);
-
-                      // 트랜잭션 완료 후 결과 표시
-                      setPaid(true);
-                      setResult(tempResult);
-                      setStep(4);
-                      alert('NFT 발급 완료! 운세 결과를 확인하세요.');
-                    } catch (error) {
-                      console.error('Transaction error:', error);
-                      alert('트랜잭션이 취소되었거나 실패했습니다.');
-                    } finally {
-                      setLoading(false);
-                    }
+                      },
+                      {
+                        onSuccess: (hash) => {
+                          console.log('Transaction hash:', hash);
+                          setPaid(true);
+                          setResult(tempResult);
+                          setStep(4);
+                          setLoading(false);
+                          alert('NFT 발급 완료! 운세 결과를 확인하세요.');
+                        },
+                        onError: (error) => {
+                          console.error('Transaction error:', error);
+                          alert('트랜잭션이 취소되었거나 실패했습니다.');
+                          setLoading(false);
+                        }
+                      }
+                    );
                   }}
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all disabled:opacity-50"
@@ -320,8 +316,6 @@ export default function FortunePage() {
         {/* Step 4: 결과 */}
         {step === 4 && result && paid && (
           <div>
-            {/* DEBUG */}
-            {console.log('Step:', step, 'Result:', !!result, 'Paid:', paid)}
             <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">🔮 2026년 병오년 운세</h2>
 
             {/* 사주팔자 */}
