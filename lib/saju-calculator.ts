@@ -8,44 +8,6 @@ export interface SajuPillars {
   dayMaster: string;
 }
 
-// 시주 계산을 위한 오자일주표 (일간별 자시 천간)
-const hourGanTable: Record<string, string[]> = {
-  '甲': ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸', '甲', '乙'],
-  '己': ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸', '甲', '乙'],
-  '乙': ['丙', '丁', '戊', '己', '庚', '辛', '壬', '癸', '甲', '乙', '丙', '丁'],
-  '庚': ['丙', '丁', '戊', '己', '庚', '辛', '壬', '癸', '甲', '乙', '丙', '丁'],
-  '丙': ['戊', '己', '庚', '辛', '壬', '癸', '甲', '乙', '丙', '丁', '戊', '己'],
-  '辛': ['戊', '己', '庚', '辛', '壬', '癸', '甲', '乙', '丙', '丁', '戊', '己'],
-  '丁': ['庚', '辛', '壬', '癸', '甲', '乙', '丙', '丁', '戊', '己', '庚', '辛'],
-  '壬': ['庚', '辛', '壬', '癸', '甲', '乙', '丙', '丁', '戊', '己', '庚', '辛'],
-  '戊': ['壬', '癸', '甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'],
-  '癸': ['壬', '癸', '甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'],
-};
-
-function getHourPillar(dayGan: string, hour: number, minute: number = 0): string {
-  const hourBranches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-
-  // 총 분으로 변환 (23:00부터 다음날 00:59까지가 子時)
-  let totalMinutes = hour * 60 + minute;
-
-  // 23시 이후는 다음 날의 자시로 처리
-  if (hour >= 23) {
-    totalMinutes = totalMinutes - 23 * 60; // 23:00을 0분으로
-  } else {
-    totalMinutes = totalMinutes + 60; // 1시간 더해서 계산
-  }
-
-  // 2시간 = 120분 단위로 지지 계산
-  const branchIndex = Math.floor(totalMinutes / 120) % 12;
-  const hourBranch = hourBranches[branchIndex];
-
-  // 일간에 따른 시간 천간
-  const ganArray = hourGanTable[dayGan] || hourGanTable['甲'];
-  const hourGan = ganArray[branchIndex];
-
-  return hourGan + hourBranch;
-}
-
 export function calculateSaju(
   year: number,
   month: number,
@@ -73,7 +35,8 @@ export function calculateSaju(
 
     console.log('Calculating saju for:', { year, month, day, hour, minute });
 
-    const solar = Solar.fromYmd(year, month, day);
+    // Solar 객체를 시간까지 포함해서 생성
+    const solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
 
     if (!solar) {
       throw new Error('Solar 객체 생성 실패');
@@ -88,13 +51,15 @@ export function calculateSaju(
     const yearPillar = lunar.getYearInGanZhi();
     const monthPillar = lunar.getMonthInGanZhi();
     const dayPillar = lunar.getDayInGanZhi();
+    const hourPillar = lunar.getTimeInGanZhi(); // 라이브러리의 시주 계산 사용
 
-    if (!yearPillar || !monthPillar || !dayPillar) {
+    console.log('Pillars:', { yearPillar, monthPillar, dayPillar, hourPillar });
+
+    if (!yearPillar || !monthPillar || !dayPillar || !hourPillar) {
       throw new Error('사주 계산 실패: 기둥 정보를 가져올 수 없습니다.');
     }
 
     const dayGan = dayPillar.charAt(0); // 일간 추출
-    const hourPillar = getHourPillar(dayGan, hour, minute);
 
     return {
       year: yearPillar,
