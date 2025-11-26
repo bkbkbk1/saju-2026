@@ -12,7 +12,6 @@ export default function FortunePage() {
   const { data: hash, sendTransaction, isPending, isError, error } = useSendTransaction();
 
   const [step, setStep] = useState<number | 'payment'>(1);
-  const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [birthHour, setBirthHour] = useState('12'); // 기본값: 12시
   const [birthMinute, setBirthMinute] = useState('00'); // 기본값: 00분
@@ -124,46 +123,30 @@ export default function FortunePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-        {/* Step 1: 이름과 생년월일 입력 */}
+        {/* Step 1: 생년월일 입력 */}
         {step === 1 && (
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">🔮 2026년 운세</h1>
-            <p className="text-xl text-gray-600 mb-8">이름과 생년월일을 입력하세요</p>
+            <p className="text-xl text-gray-600 mb-8">생년월일을 입력하세요</p>
 
-            <div className="max-w-md mx-auto space-y-6 mb-8">
-              <div>
-                <label className="block text-left text-gray-700 font-medium mb-2">
-                  이름
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value.slice(0, 20))}
-                  placeholder="입력하세요 (최대 20자)"
-                  className="w-full px-6 py-4 text-xl text-center border-2 border-purple-300 rounded-2xl focus:outline-none focus:border-purple-600"
-                  maxLength={20}
-                />
-              </div>
-
-              <div>
-                <label className="block text-left text-gray-700 font-medium mb-2">
-                  생년월일
-                </label>
-                <input
-                  type="text"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                  placeholder="예: 19901225"
-                  className="w-full px-6 py-4 text-xl text-center border-2 border-purple-300 rounded-2xl focus:outline-none focus:border-purple-600"
-                  maxLength={8}
-                />
-                <p className="text-sm text-gray-500 mt-2">YYYYMMDD 형식 (8자리)</p>
-              </div>
+            <div className="max-w-md mx-auto mb-8">
+              <label className="block text-left text-gray-700 font-medium mb-2">
+                생년월일
+              </label>
+              <input
+                type="text"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                placeholder="예: 19901225"
+                className="w-full px-6 py-4 text-xl text-center border-2 border-purple-300 rounded-2xl focus:outline-none focus:border-purple-600"
+                maxLength={8}
+              />
+              <p className="text-sm text-gray-500 mt-2">YYYYMMDD 형식 (8자리)</p>
             </div>
 
             <button
               onClick={() => setStep(2)}
-              disabled={!name.trim() || birthDate.length !== 8}
+              disabled={birthDate.length !== 8}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold px-12 py-4 rounded-full hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               다음
@@ -397,8 +380,7 @@ export default function FortunePage() {
         {/* Step 4: 결과 */}
         {step === 4 && result && paid && (
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">🔮 2026년 병오년 운세</h2>
-            <p className="text-xl text-purple-700 font-semibold mb-6 text-center">{name}님의 운세</p>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">🔮 2026년 병오년 운세</h2>
 
             {/* 사주팔자 */}
             <div className="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-2xl p-6 mb-6">
@@ -469,7 +451,6 @@ export default function FortunePage() {
             <button
               onClick={() => {
                 setStep(1);
-                setName('');
                 setBirthDate('');
                 setBirthHour('12');
                 setBirthMinute('00');
