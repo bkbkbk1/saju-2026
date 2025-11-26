@@ -22,11 +22,21 @@ const hourGanTable: Record<string, string[]> = {
   '癸': ['壬', '癸', '甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'],
 };
 
-function getHourPillar(dayGan: string, hour: number): string {
+function getHourPillar(dayGan: string, hour: number, minute: number = 0): string {
   const hourBranches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 
-  // 시간을 지지로 변환 (23-1시: 子, 1-3시: 丑, ...)
-  const branchIndex = Math.floor(((hour + 1) % 24) / 2);
+  // 총 분으로 변환 (23:00부터 다음날 00:59까지가 子時)
+  let totalMinutes = hour * 60 + minute;
+
+  // 23시 이후는 다음 날의 자시로 처리
+  if (hour >= 23) {
+    totalMinutes = totalMinutes - 23 * 60; // 23:00을 0분으로
+  } else {
+    totalMinutes = totalMinutes + 60; // 1시간 더해서 계산
+  }
+
+  // 2시간 = 120분 단위로 지지 계산
+  const branchIndex = Math.floor(totalMinutes / 120) % 12;
   const hourBranch = hourBranches[branchIndex];
 
   // 일간에 따른 시간 천간
@@ -40,7 +50,8 @@ export function calculateSaju(
   year: number,
   month: number,
   day: number,
-  hour: number
+  hour: number,
+  minute: number = 0
 ): SajuPillars {
   try {
     // 입력값 검증
@@ -60,7 +71,7 @@ export function calculateSaju(
       throw new Error('일은 1-31 사이여야 합니다.');
     }
 
-    console.log('Calculating saju for:', { year, month, day, hour });
+    console.log('Calculating saju for:', { year, month, day, hour, minute });
 
     const solar = Solar.fromYmd(year, month, day);
 
@@ -83,7 +94,7 @@ export function calculateSaju(
     }
 
     const dayGan = dayPillar.charAt(0); // 일간 추출
-    const hourPillar = getHourPillar(dayGan, hour);
+    const hourPillar = getHourPillar(dayGan, hour, minute);
 
     return {
       year: yearPillar,

@@ -4,11 +4,12 @@ import { interpretSaju } from '@/lib/chatgpt-interpreter';
 
 export async function POST(req: NextRequest) {
   try {
-    const { birthDate, birthHour, gender } = await req.json();
+    const { birthDate, birthHour, birthMinute, gender } = await req.json();
 
     console.log('=== API Request ===');
     console.log('birthDate:', birthDate);
     console.log('birthHour:', birthHour);
+    console.log('birthMinute:', birthMinute);
     console.log('gender:', gender);
 
     // 유효성 검사
@@ -25,12 +26,13 @@ export async function POST(req: NextRequest) {
     const month = parseInt(birthDate.substring(4, 6));
     const day = parseInt(birthDate.substring(6, 8));
     const hour = parseInt(birthHour);
+    const minute = parseInt(birthMinute || '0');
 
-    console.log('Parsed values:', { year, month, day, hour });
+    console.log('Parsed values:', { year, month, day, hour, minute });
     console.log('Calling calculateSaju...');
 
     // 사주 계산
-    const pillars = calculateSaju(year, month, day, hour);
+    const pillars = calculateSaju(year, month, day, hour, minute);
 
     console.log('Saju calculation successful:', pillars);
 

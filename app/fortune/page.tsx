@@ -80,6 +80,7 @@ export default function FortunePage() {
         body: JSON.stringify({
           birthDate,
           birthHour: parseInt(birthHour),
+          birthMinute: parseInt(birthMinute),
           gender
         })
       });
