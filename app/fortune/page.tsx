@@ -13,7 +13,7 @@ export default function FortunePage() {
 
   const [step, setStep] = useState<number | 'payment'>(1);
   const [birthDate, setBirthDate] = useState('');
-  const [birthHour, setBirthHour] = useState('12');
+  const [birthHour, setBirthHour] = useState('12'); // 기본값: 12시 (오시)
   const [gender, setGender] = useState<'남성' | '여성'>('남성');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -126,57 +126,46 @@ export default function FortunePage() {
         {/* Step 2: 출생시간 선택 */}
         {step === 2 && (
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">출생시간 선택</h2>
-            <p className="text-gray-600 mb-8">대략적인 시간대를 선택하세요</p>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">출생시간 입력</h2>
+            <p className="text-gray-600 mb-8">정확한 시간을 선택해주세요 (시간만)</p>
 
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <button
-                onClick={() => setBirthHour('0')}
-                className={`p-6 rounded-2xl border-2 transition-all ${
-                  birthHour === '0'
-                    ? 'border-purple-600 bg-purple-50'
-                    : 'border-gray-300 hover:border-purple-400'
-                }`}
+            <div className="max-w-md mx-auto mb-8">
+              <label className="block text-left text-gray-700 font-medium mb-3">
+                출생 시간 (0~23시)
+              </label>
+              <select
+                value={birthHour}
+                onChange={(e) => setBirthHour(e.target.value)}
+                className="w-full px-6 py-4 text-xl border-2 border-purple-300 rounded-2xl focus:outline-none focus:border-purple-600 bg-white"
               >
-                <div className="text-xl font-semibold">자시</div>
-                <div className="text-sm text-gray-600">23:00 - 01:00</div>
-              </button>
-
-              <button
-                onClick={() => setBirthHour('9')}
-                className={`p-6 rounded-2xl border-2 transition-all ${
-                  birthHour === '9'
-                    ? 'border-purple-600 bg-purple-50'
-                    : 'border-gray-300 hover:border-purple-400'
-                }`}
-              >
-                <div className="text-xl font-semibold">오전</div>
-                <div className="text-sm text-gray-600">06:00 - 12:00</div>
-              </button>
-
-              <button
-                onClick={() => setBirthHour('15')}
-                className={`p-6 rounded-2xl border-2 transition-all ${
-                  birthHour === '15'
-                    ? 'border-purple-600 bg-purple-50'
-                    : 'border-gray-300 hover:border-purple-400'
-                }`}
-              >
-                <div className="text-xl font-semibold">오후</div>
-                <div className="text-sm text-gray-600">12:00 - 18:00</div>
-              </button>
-
-              <button
-                onClick={() => setBirthHour('21')}
-                className={`p-6 rounded-2xl border-2 transition-all ${
-                  birthHour === '21'
-                    ? 'border-purple-600 bg-purple-50'
-                    : 'border-gray-300 hover:border-purple-400'
-                }`}
-              >
-                <div className="text-xl font-semibold">저녁</div>
-                <div className="text-sm text-gray-600">18:00 - 23:00</div>
-              </button>
+                <option value="0">00시 (자시 23:00~01:00)</option>
+                <option value="1">01시 (축시 01:00~03:00)</option>
+                <option value="2">02시 (축시)</option>
+                <option value="3">03시 (인시 03:00~05:00)</option>
+                <option value="4">04시 (인시)</option>
+                <option value="5">05시 (묘시 05:00~07:00)</option>
+                <option value="6">06시 (묘시)</option>
+                <option value="7">07시 (진시 07:00~09:00)</option>
+                <option value="8">08시 (진시)</option>
+                <option value="9">09시 (사시 09:00~11:00)</option>
+                <option value="10">10시 (사시)</option>
+                <option value="11">11시 (오시 11:00~13:00)</option>
+                <option value="12">12시 (오시)</option>
+                <option value="13">13시 (미시 13:00~15:00)</option>
+                <option value="14">14시 (미시)</option>
+                <option value="15">15시 (신시 15:00~17:00)</option>
+                <option value="16">16시 (신시)</option>
+                <option value="17">17시 (유시 17:00~19:00)</option>
+                <option value="18">18시 (유시)</option>
+                <option value="19">19시 (술시 19:00~21:00)</option>
+                <option value="20">20시 (술시)</option>
+                <option value="21">21시 (해시 21:00~23:00)</option>
+                <option value="22">22시 (해시)</option>
+                <option value="23">23시 (자시 23:00~01:00)</option>
+              </select>
+              <p className="text-sm text-gray-500 mt-3">
+                ※ 모르시면 대략적인 시간대를 선택하세요
+              </p>
             </div>
 
             <div className="flex gap-4 justify-center">
