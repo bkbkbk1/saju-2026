@@ -55,7 +55,7 @@ export async function interpretSaju(
         }
       ],
       temperature: 0.7,
-      max_tokens: 300,
+      max_tokens: 2000,
       response_format: { type: 'json_object' }
     });
 
@@ -64,9 +64,17 @@ export async function interpretSaju(
       throw new Error('ChatGPT 응답이 비어있습니다.');
     }
 
-    return JSON.parse(result) as FortuneResult;
+    console.log('ChatGPT raw response:', result);
+
+    const parsed = JSON.parse(result) as FortuneResult;
+    console.log('Parsed fortune result:', parsed);
+
+    return parsed;
   } catch (error) {
     console.error('Error interpreting Saju:', error);
+    if (error instanceof SyntaxError) {
+      console.error('JSON parse error. Raw content might be truncated.');
+    }
     throw new Error('운세 해석 중 오류가 발생했습니다.');
   }
 }
