@@ -58,11 +58,20 @@ export default function FortunePage() {
       });
 
       const data = await response.json();
+
+      console.log('API response:', data);
+      console.log('Response status:', response.status);
+
+      if (!response.ok || data.error) {
+        alert(`오류: ${data.error || data.details || '알 수 없는 오류'}`);
+        return;
+      }
+
       setTempResult(data);
       setStep('payment'); // 결제 단계
     } catch (error) {
       console.error('Error:', error);
-      alert('운세 계산 중 오류가 발생했습니다.');
+      alert('운세 계산 중 오류가 발생했습니다: ' + (error instanceof Error ? error.message : ''));
     } finally {
       setLoading(false);
     }

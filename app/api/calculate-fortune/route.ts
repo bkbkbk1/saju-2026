@@ -6,8 +6,14 @@ export async function POST(req: NextRequest) {
   try {
     const { birthDate, birthHour, gender } = await req.json();
 
+    console.log('=== API Request ===');
+    console.log('birthDate:', birthDate);
+    console.log('birthHour:', birthHour);
+    console.log('gender:', gender);
+
     // 유효성 검사
     if (!birthDate || birthDate.length !== 8) {
+      console.log('ERROR: Invalid birthDate length');
       return NextResponse.json(
         { error: '생년월일을 8자리로 입력해주세요' },
         { status: 400 }
@@ -20,8 +26,13 @@ export async function POST(req: NextRequest) {
     const day = parseInt(birthDate.substring(6, 8));
     const hour = parseInt(birthHour);
 
+    console.log('Parsed values:', { year, month, day, hour });
+    console.log('Calling calculateSaju...');
+
     // 사주 계산
     const pillars = calculateSaju(year, month, day, hour);
+
+    console.log('Saju calculation successful:', pillars);
 
     // ChatGPT 운세 해석
     const fortune = await interpretSaju(pillars, gender);
