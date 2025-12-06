@@ -4,18 +4,21 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount, useConnect, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
+import { useLanguage } from '@/lib/LanguageContext';
+import LanguageToggle from '../components/LanguageToggle';
 
 export default function FortunePage() {
   const router = useRouter();
   const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
   const { data: hash, sendTransaction, isPending, isError, error } = useSendTransaction();
+  const { t } = useLanguage();
 
   const [step, setStep] = useState<number | 'payment'>(1);
   const [birthDate, setBirthDate] = useState('');
-  const [birthHour, setBirthHour] = useState('12'); // 기본값: 12시
-  const [birthMinute, setBirthMinute] = useState('00'); // 기본값: 00분
-  const [gender, setGender] = useState<'남성' | '여성'>('남성');
+  const [birthHour, setBirthHour] = useState('12');
+  const [birthMinute, setBirthMinute] = useState('00');
+  const [gender, setGender] = useState<'male' | 'female'>('male');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [paid, setPaid] = useState(false);
@@ -55,18 +58,18 @@ export default function FortunePage() {
     }
   }, [isConfirmed, hash, tempResult]);
 
-  // 트랜잭션 에러 처리
+  // Transaction error handling
   useEffect(() => {
     if (isError && error) {
       console.error('❌ Transaction error:', error);
-      alert('트랜잭션 실패: ' + error.message);
+      alert(t.fortune.errors.transactionFailed + error.message);
       setLoading(false);
     }
-  }, [isError, error]);
+  }, [isError, error, t]);
 
   const handleCalculate = async () => {
     if (!birthDate || birthDate.length !== 8) {
-      alert('생년월일을 8자리로 입력해주세요 (예: 19901225)');
+      alert(t.fortune.errors.birthDateInvalid);
       return;
     }
 
@@ -90,15 +93,15 @@ export default function FortunePage() {
       console.log('Response status:', response.status);
 
       if (!response.ok || data.error) {
-        alert(`오류: ${data.error || data.details || '알 수 없는 오류'}`);
+        alert(`${t.fortune.errors.apiError}${data.error || data.details || 'Unknown error'}`);
         return;
       }
 
       setTempResult(data);
-      setStep('payment'); // 결제 단계
+      setStep('payment');
     } catch (error) {
       console.error('Error:', error);
-      alert('운세 계산 중 오류가 발생했습니다: ' + (error instanceof Error ? error.message : ''));
+      alert(t.fortune.errors.calculationError + (error instanceof Error ? error.message : ''));
     } finally {
       setLoading(false);
     }
@@ -122,26 +125,27 @@ export default function FortunePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center p-4">
+      <LanguageToggle />
       <div className="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-        {/* Step 1: 생년월일 입력 */}
+        {/* Step 1: Birth Date */}
         {step === 1 && (
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">🔮 2026년 운세</h1>
-            <p className="text-xl text-gray-600 mb-8">양력 생년월일을 입력하세요</p>
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">{t.fortune.title}</h1>
+            <p className="text-xl text-gray-600 mb-8">{t.fortune.subtitle}</p>
 
             <div className="max-w-md mx-auto mb-8">
               <label className="block text-left text-gray-700 font-medium mb-2">
-                양력 생년월일
+                {t.fortune.birthDate.label}
               </label>
               <input
                 type="text"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                placeholder="예: 19901225"
+                placeholder={t.fortune.birthDate.placeholder}
                 className="w-full px-6 py-4 text-xl text-center border-2 border-purple-300 rounded-2xl focus:outline-none focus:border-purple-600"
                 maxLength={8}
               />
-              <p className="text-sm text-gray-500 mt-2">양력 YYYYMMDD 형식 (8자리)</p>
+              <p className="text-sm text-gray-500 mt-2">{t.fortune.birthDate.helper}</p>
             </div>
 
             <button
@@ -149,20 +153,20 @@ export default function FortunePage() {
               disabled={birthDate.length !== 8}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold px-12 py-4 rounded-full hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              다음
+              {t.fortune.buttons.next}
             </button>
           </div>
         )}
 
-        {/* Step 2: 출생시간 선택 */}
+        {/* Step 2: Birth Time */}
         {step === 2 && (
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">출생시간 입력</h2>
-            <p className="text-gray-600 mb-8">출생 시간을 입력해주세요</p>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">{t.fortune.birthTime.title}</h2>
+            <p className="text-gray-600 mb-8">{t.fortune.birthTime.subtitle}</p>
 
             <div className="max-w-md mx-auto mb-8">
               <label className="block text-left text-gray-700 font-medium mb-3">
-                출생시간
+                {t.fortune.birthTime.label}
               </label>
 
               <div className="flex gap-4 items-center justify-center">
@@ -174,7 +178,7 @@ export default function FortunePage() {
                   >
                     {Array.from({ length: 24 }, (_, i) => (
                       <option key={i} value={i.toString()}>
-                        {i.toString().padStart(2, '0')}시
+                        {i.toString().padStart(2, '0')} {t.fortune.birthTime.hour}
                       </option>
                     ))}
                   </select>
@@ -188,7 +192,7 @@ export default function FortunePage() {
                   >
                     {Array.from({ length: 60 }, (_, i) => (
                       <option key={i} value={i.toString()}>
-                        {i.toString().padStart(2, '0')}분
+                        {i.toString().padStart(2, '0')} {t.fortune.birthTime.minute}
                       </option>
                     ))}
                   </select>
@@ -196,7 +200,7 @@ export default function FortunePage() {
               </div>
 
               <p className="text-sm text-gray-500 mt-3">
-                ※ 정확한 시간을 모르시면 대략적인 시간을 선택하세요
+                {t.fortune.birthTime.helper}
               </p>
             </div>
 
@@ -205,47 +209,47 @@ export default function FortunePage() {
                 onClick={() => setStep(1)}
                 className="px-8 py-3 border-2 border-gray-300 rounded-full hover:border-purple-400 transition-all"
               >
-                이전
+                {t.fortune.buttons.prev}
               </button>
               <button
                 onClick={() => setStep(3)}
                 className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold px-12 py-3 rounded-full hover:shadow-lg transition-all"
               >
-                다음
+                {t.fortune.buttons.next}
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 3: 성별 선택 */}
+        {/* Step 3: Gender Selection */}
         {step === 3 && (
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">성별 선택</h2>
-            <p className="text-gray-600 mb-8">대운 계산을 위해 필요합니다</p>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">{t.fortune.gender.title}</h2>
+            <p className="text-gray-600 mb-8">{t.fortune.gender.subtitle}</p>
 
             <div className="grid grid-cols-2 gap-4 mb-8 max-w-md mx-auto">
               <button
-                onClick={() => setGender('남성')}
+                onClick={() => setGender('male')}
                 className={`p-8 rounded-2xl border-2 transition-all ${
-                  gender === '남성'
+                  gender === 'male'
                     ? 'border-purple-600 bg-purple-50'
                     : 'border-gray-300 hover:border-purple-400'
                 }`}
               >
                 <div className="text-5xl mb-2">👨</div>
-                <div className="text-xl font-semibold">남성</div>
+                <div className="text-xl font-semibold">{t.fortune.gender.male}</div>
               </button>
 
               <button
-                onClick={() => setGender('여성')}
+                onClick={() => setGender('female')}
                 className={`p-8 rounded-2xl border-2 transition-all ${
-                  gender === '여성'
+                  gender === 'female'
                     ? 'border-purple-600 bg-purple-50'
                     : 'border-gray-300 hover:border-purple-400'
                 }`}
               >
                 <div className="text-5xl mb-2">👩</div>
-                <div className="text-xl font-semibold">여성</div>
+                <div className="text-xl font-semibold">{t.fortune.gender.female}</div>
               </button>
             </div>
 
@@ -254,66 +258,66 @@ export default function FortunePage() {
                 onClick={() => setStep(2)}
                 className="px-8 py-3 border-2 border-gray-300 rounded-full hover:border-purple-400 transition-all"
               >
-                이전
+                {t.fortune.buttons.prev}
               </button>
               <button
                 onClick={handleCalculate}
                 disabled={loading}
                 className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold px-12 py-3 rounded-full hover:shadow-lg transition-all disabled:opacity-50"
               >
-                {loading ? '계산 중...' : '다음'}
+                {loading ? t.fortune.buttons.calculating : t.fortune.buttons.next}
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 3.5: 결제 */}
+        {/* Step 3.5: Payment */}
         {step === 'payment' && tempResult && (
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">🔮 2026년 운세 보기</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">{t.fortune.payment.title}</h2>
             <p className="text-gray-600 mb-8">
-              ChatGPT가 분석한 당신의 2026년 운세를 확인하세요
+              {t.fortune.payment.subtitle}
             </p>
 
             <div className="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-2xl p-8 mb-8">
               <div className="text-6xl mb-4">🔮</div>
               <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                2026년 병오년 운세
+                {t.fortune.payment.fortuneTitle}
               </h3>
               <p className="text-gray-600 mb-6">
-                사주팔자와 ChatGPT 상세 해석
+                {t.fortune.payment.fortuneDesc}
               </p>
               <div className="text-4xl font-bold text-purple-700">
-                0.0001 ETH
+                {t.fortune.payment.price}
               </div>
-              <p className="text-sm text-gray-500 mt-2">약 $0.30 USD</p>
+              <p className="text-sm text-gray-500 mt-2">{t.fortune.payment.priceUsd}</p>
             </div>
 
             <div className="space-y-3 text-left bg-white border-2 border-purple-200 rounded-xl p-6 mb-8">
               <div className="flex items-center gap-3">
                 <span className="text-green-500">✓</span>
-                <span className="text-gray-700">사주팔자 (년/월/일/시)</span>
+                <span className="text-gray-700">{t.fortune.payment.includes.pillars}</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-green-500">✓</span>
-                <span className="text-gray-700">2026년 상세 운세 해석</span>
+                <span className="text-gray-700">{t.fortune.payment.includes.analysis}</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-green-500">✓</span>
-                <span className="text-gray-700">재물/직업/건강운 분석</span>
+                <span className="text-gray-700">{t.fortune.payment.includes.categories}</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-green-500">✓</span>
-                <span className="text-gray-700">AI 맞춤 조언</span>
+                <span className="text-gray-700">{t.fortune.payment.includes.advice}</span>
               </div>
             </div>
 
             {!isConnected ? (
               <div className="space-y-4">
                 <div className="text-xs bg-yellow-100 p-3 rounded mb-4">
-                  <div>환경: {isMiniApp ? '✅ 미니앱' : '❌ 브라우저'}</div>
-                  <div>Connectors: {connectors.length}개</div>
-                  <div>연결 상태: {isConnected ? '연결됨' : '미연결'}</div>
+                  <div>Environment: {isMiniApp ? '✅ MiniApp' : '❌ Browser'}</div>
+                  <div>Connectors: {connectors.length}</div>
+                  <div>Status: {isConnected ? 'Connected' : 'Not connected'}</div>
                 </div>
                 <button
                   onClick={() => {
@@ -321,24 +325,23 @@ export default function FortunePage() {
                     if (connectors[0]) {
                       connect({ connector: connectors[0] });
                     } else {
-                      alert('Warpcast 앱에서 열어주세요.');
+                      alert(t.fortune.payment.warningMiniapp);
                     }
                   }}
                   className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all"
                 >
-                  지갑 연결하기
+                  {t.fortune.payment.connectWallet}
                 </button>
                 {!isMiniApp && (
-                  <div className="text-sm text-red-600 text-center">
-                    ⚠️ 브라우저에서는 지갑 연결이 작동하지 않습니다.<br/>
-                    Warpcast 앱에서 캐스트로 열어주세요.
+                  <div className="text-sm text-red-600 text-center whitespace-pre-line">
+                    {t.fortune.payment.warningBrowser}
                   </div>
                 )}
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="text-sm text-gray-600 text-center">
-                  연결된 지갑: {address?.slice(0, 6)}...{address?.slice(-4)}
+                  {t.fortune.payment.connectedWallet} {address?.slice(0, 6)}...{address?.slice(-4)}
                 </div>
                 <button
                   onClick={() => {
@@ -348,7 +351,7 @@ export default function FortunePage() {
                     console.log('address:', address);
 
                     if (!tempResult) {
-                      alert('운세 데이터가 없습니다. 다시 시도해주세요.');
+                      alert(t.fortune.errors.noData);
                       setStep(1);
                       return;
                     }
@@ -363,7 +366,7 @@ export default function FortunePage() {
                   disabled={isPending || isConfirming || !tempResult}
                   className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg py-5 rounded-full hover:shadow-2xl transition-all disabled:opacity-50"
                 >
-                  {isPending ? '지갑 승인 대기 중...' : isConfirming ? '트랜잭션 확인 중...' : '결제하고 운세 보기 →'}
+                  {isPending ? t.fortune.payment.waiting : isConfirming ? t.fortune.payment.confirming : t.fortune.payment.pay}
                 </button>
               </div>
             )}
@@ -372,45 +375,45 @@ export default function FortunePage() {
               onClick={() => setStep(3)}
               className="mt-4 text-gray-500 hover:text-gray-700 transition-all"
             >
-              ← 이전으로
+              ← {t.fortune.buttons.prev}
             </button>
           </div>
         )}
 
-        {/* Step 4: 결과 */}
+        {/* Step 4: Results */}
         {step === 4 && result && paid && (
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">🔮 2026년 병오년 운세</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">{t.fortune.result.title}</h2>
 
-            {/* 사주팔자 */}
+            {/* Four Pillars */}
             <div className="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-2xl p-6 mb-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">사주팔자</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">{t.fortune.result.pillarsTitle}</h3>
               <div className="grid grid-cols-4 gap-4">
                 <div className="text-center">
-                  <div className="text-sm text-gray-600 mb-1">년주</div>
+                  <div className="text-sm text-gray-600 mb-1">{t.fortune.result.year}</div>
                   <div className="text-2xl font-bold text-purple-700">{result.pillars.year}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm text-gray-600 mb-1">월주</div>
+                  <div className="text-sm text-gray-600 mb-1">{t.fortune.result.month}</div>
                   <div className="text-2xl font-bold text-purple-700">{result.pillars.month}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm text-gray-600 mb-1">일주</div>
+                  <div className="text-sm text-gray-600 mb-1">{t.fortune.result.day}</div>
                   <div className="text-2xl font-bold text-purple-700">{result.pillars.day}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm text-gray-600 mb-1">시주</div>
+                  <div className="text-sm text-gray-600 mb-1">{t.fortune.result.hour}</div>
                   <div className="text-2xl font-bold text-purple-700">{result.pillars.hour}</div>
                 </div>
               </div>
             </div>
 
-            {/* 운세 */}
+            {/* Fortune */}
             <div className="space-y-4 mb-8">
               <div className="bg-white border-2 border-purple-200 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">✨</span>
-                  <h4 className="text-lg font-semibold text-gray-800">전체운</h4>
+                  <h4 className="text-lg font-semibold text-gray-800">{t.fortune.result.overall}</h4>
                 </div>
                 <p className="text-gray-700">{result.fortune.overall}</p>
               </div>
@@ -418,7 +421,7 @@ export default function FortunePage() {
               <div className="bg-white border-2 border-purple-200 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">💰</span>
-                  <h4 className="text-lg font-semibold text-gray-800">재물운</h4>
+                  <h4 className="text-lg font-semibold text-gray-800">{t.fortune.result.wealth}</h4>
                 </div>
                 <p className="text-gray-700">{result.fortune.wealth}</p>
               </div>
@@ -426,7 +429,7 @@ export default function FortunePage() {
               <div className="bg-white border-2 border-purple-200 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">🏆</span>
-                  <h4 className="text-lg font-semibold text-gray-800">직업운</h4>
+                  <h4 className="text-lg font-semibold text-gray-800">{t.fortune.result.career}</h4>
                 </div>
                 <p className="text-gray-700">{result.fortune.career}</p>
               </div>
@@ -434,7 +437,7 @@ export default function FortunePage() {
               <div className="bg-white border-2 border-purple-200 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">💚</span>
-                  <h4 className="text-lg font-semibold text-gray-800">건강운</h4>
+                  <h4 className="text-lg font-semibold text-gray-800">{t.fortune.result.health}</h4>
                 </div>
                 <p className="text-gray-700">{result.fortune.health}</p>
               </div>
@@ -442,7 +445,7 @@ export default function FortunePage() {
               <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">💡</span>
-                  <h4 className="text-lg font-semibold text-gray-800">조언</h4>
+                  <h4 className="text-lg font-semibold text-gray-800">{t.fortune.result.advice}</h4>
                 </div>
                 <p className="text-gray-700 font-medium">{result.fortune.advice}</p>
               </div>
@@ -460,7 +463,7 @@ export default function FortunePage() {
               }}
               className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold py-4 rounded-full hover:shadow-lg transition-all"
             >
-              다시 보기
+              {t.fortune.buttons.retry}
             </button>
           </div>
         )}
