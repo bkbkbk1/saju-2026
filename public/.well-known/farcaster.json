@@ -6,24 +6,27 @@
   },
   "frame": {
     "version": "1",
-    "name": "2026년 운세",
+    "name": "Saju",
     "iconUrl": "https://saju-2026.vercel.app/icon.png",
-    "homeUrl": "https://saju-2026.vercel.app/api/frame",
+    "homeUrl": "https://saju-2026.vercel.app",
     "imageUrl": "https://saju-2026.vercel.app/og-welcome.png",
-    "buttonTitle": "운세 보기",
+    "buttonTitle": "Check My Fortune",
     "splashImageUrl": "https://saju-2026.vercel.app/splash.png",
     "splashBackgroundColor": "#667eea",
-    "webhookUrl": "https://saju-2026.vercel.app/api/frame"
+    "webhookUrl": "https://saju-2026.vercel.app/api/webhook",
+    "subtitle": "Your 2026 Fortune Reading",
+    "description": "Traditional Korean fortune telling powered by AI. Discover what the Year of Fire Horse has in store for you through Yin-Yang and Five Elements analysis.",
+    "primaryCategory": "entertainment"
   },
   "miniapp": {
     "version": "1",
-    "name": "2026년 병오년 운세",
+    "name": "Saju",
     "slug": "saju2026",
     "homeUrl": "https://saju-2026.vercel.app/fortune",
     "iconUrl": "https://saju-2026.vercel.app/icon.png",
-    "subtitle": "정통 사주명리로 보는 2026년",
-    "description": "생년월일시와 성별을 입력하면 ChatGPT가 2026년 병오년 운세를 해석해드립니다. 재물운, 직업운, 건강운까지 상세하게!",
-    "primaryCategory": "lifestyle",
-    "tags": ["fortune", "saju", "2026", "astrology", "korea"]
+    "subtitle": "Your 2026 Fortune Reading",
+    "description": "Traditional Korean fortune telling powered by AI. Discover what the Year of Fire Horse has in store for you through Yin-Yang and Five Elements analysis.",
+    "primaryCategory": "entertainment",
+    "tags": ["fortune", "saju", "korean astrology", "2026", "horoscope", "divination"]
   }
 }
